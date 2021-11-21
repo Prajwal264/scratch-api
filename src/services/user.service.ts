@@ -2,7 +2,7 @@ import { User } from '../entities/user.entity';
 import { compare, hash } from 'bcryptjs';
 import errors, { ERROR_TYPE } from '../constants/errors';
 import { UserResponse } from '../types/user.types';
-import { createAccessToken, createRefreshToken } from 'src/helpers/token.helper';
+import { createAccessToken, createRefreshToken } from '../helpers/token.helper';
 
 export interface UserCreateInput {
   username: string,

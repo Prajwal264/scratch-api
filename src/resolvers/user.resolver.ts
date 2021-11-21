@@ -1,5 +1,5 @@
 import { UserService } from '../services/user.service';
-import { UserResponse } from '../types/user.types';
+import { LoginResponse, UserResponse } from '../types/user.types';
 import { Arg, Mutation, Query, Resolver } from 'type-graphql';
 
 /**
@@ -47,7 +47,7 @@ export class UserResolver {
     return userResponse;
   }
 
-  @Mutation(() => UserResponse)
+  @Mutation(() => LoginResponse)
   async login(
     @Arg('email') email: string,
     @Arg('password') password: string,
