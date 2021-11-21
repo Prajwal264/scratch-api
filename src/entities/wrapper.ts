@@ -24,7 +24,7 @@ export abstract class EntityWrapper extends BaseEntity {
    *
    *
    * @type {string}
-   * @memberof Model
+   * @memberof EntityWrapper
    */
   @Field(() => ID)
   @PrimaryColumn("varchar", {
@@ -33,11 +33,11 @@ export abstract class EntityWrapper extends BaseEntity {
   id: string;
 
   /**
- *
- *
- * @type {Date}
- * @memberof User
- */
+   *
+   *
+   * @type {Date}
+   * @memberof EntityWrapper
+   */
   @Field(() => Date)
   @CreateDateColumn({ name: "created_at" })
   createdAt: Date
@@ -46,22 +46,27 @@ export abstract class EntityWrapper extends BaseEntity {
    *
    *
    * @type {Date}
-   * @memberof User
+   * @memberof EntityWrapper
    */
   @Field(() => Date)
   @UpdateDateColumn({ name: "updated_at" })
   updatedAt: Date
 
-
-
+  /**
+   *
+   *
+   * @memberof EntityWrapper
+   */
   @BeforeInsert()
   setId() {
     this.id = this.id || shortid.generate();
   }
+
   /**
    *
    *
-   * @memberof User
+   * @return {*}  {Promise<void>}
+   * @memberof EntityWrapper
    */
   @BeforeInsert()
   @BeforeUpdate()

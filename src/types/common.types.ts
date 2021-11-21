@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 export type Context = {
-  req?: Request,
-  res?: Response,
+  req: Request,
+  res: Response,
   userId?: string,
 }

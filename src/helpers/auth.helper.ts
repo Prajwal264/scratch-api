@@ -1,6 +1,6 @@
 import { createMethodDecorator } from 'type-graphql';
-import { Request } from 'express'
 import { verifyAccessToken } from './token.helper';
+import { Context } from 'src/types/common.types';
 // TODO: add an @authenticated/@private dectorator that checks if the user is eligible to make the request
 /**
  *
@@ -8,8 +8,8 @@ import { verifyAccessToken } from './token.helper';
  * @return {*} 
  */
 export const Authorized = () => {
-  return createMethodDecorator(async ({ context }: any, next) => {
-    const req: Request = context.req;
+  return createMethodDecorator(async ({ context }: {context: Context}, next) => {
+    const req = context.req;
     const authorizationHeader = req.headers.authorization;
     if (!authorizationHeader) throw new Error('Not Authorized');
     const accessToken = authorizationHeader.split(' ')[1];
