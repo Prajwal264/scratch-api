@@ -46,4 +46,17 @@ export class UserResolver {
 
     return userResponse;
   }
+
+  @Mutation(() => UserResponse)
+  async login(
+    @Arg('email') email: string,
+    @Arg('password') password: string,
+  ) {
+    const userResponse = this.userService.verify({
+      email,
+      password
+    });
+
+    return userResponse;
+  }
 }

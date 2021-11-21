@@ -1,7 +1,8 @@
 import { User } from '../entities/user.entity';
-import { hash } from 'bcryptjs';
+import { compare, hash } from 'bcryptjs';
 import errors, { ERROR_TYPE } from '../constants/errors';
 import { UserResponse } from '../types/user.types';
+import { createAccessToken, createRefreshToken } from 'src/helpers/token.helper';
 
 export interface UserCreateInput {
   username: string,
@@ -78,6 +79,18 @@ export class UserService {
     };
   }
 
+  /**
+   *
+   *
+   * @private
+   * @param {string} password
+   * @param {string} userPassword
+   * @return {*}  {Promise<boolean>}
+   * @memberof UserService
+   */
+  private async comparePasswords(password: string, userPassword: string): Promise<boolean> {
+    return compare(password, userPassword);
+  }
 
   /**
    *
@@ -113,5 +126,57 @@ export class UserService {
     }).save();
 
     return { user };
+  }
+
+
+  /**
+   *
+   *
+   * @param {{
+   *     email: string,
+   *     password: string,
+   *   }} {
+   *     email,
+   *     password
+   *   }
+   * @return {*} 
+   * @memberof UserService
+   */
+  public async verify({
+    email,
+    password
+  }: {
+    email: string,
+    password: string,
+  }) {
+    const { user } = await this.getByEmail(email)
+    if (!user) {
+      return {
+        errors: [{
+          field: 'email',
+          ...errors[ERROR_TYPE.NOT_FOUND]
+        }]
+      }
+    }
+    const validUser = await this.comparePasswords(password, user.password);
+    if (!validUser) {
+      return {
+        errors: [{
+          field: 'password',
+          ...errors[ERROR_TYPE.UNAUTHORIZED],
+        }]
+      }
+    }
+
+    const accessToken = createAccessToken({ userId: user.id }, '15m')
+    const refreshToken = createRefreshToken({ userId: user.id })
+    const userWithJwt = {
+      user: {
+        ...user,
+        accessToken,
+        refreshToken,
+      }
+    }
+    return userWithJwt;
   }
 }
