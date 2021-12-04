@@ -3,6 +3,7 @@ import { compare, hash } from 'bcryptjs';
 import errors, { ERROR_TYPE } from '../constants/errors';
 import { UserResponse } from '../types/user.types';
 import { createAccessToken, createRefreshToken } from '../helpers/token.helper';
+import { Upload } from '../types/common.types';
 
 export interface UserCreateInput {
   username: string,
@@ -178,5 +179,43 @@ export class UserService {
       }
     }
     return userWithJwt;
+  }
+
+  /**
+   *
+   *
+   * @param {{
+   *     username?: string,
+   *     bio?: string,
+   *     profilePic?: Upload,
+   *   }} {
+   *     username,
+   *     bio,
+   *     profilePic,
+   *   }
+   * @memberof UserService
+   */
+  public async edit(userId: string, {
+    username,
+    bio,
+    profileImage,
+  }: {
+    username?: string,
+    bio?: string,
+    profileImage?: Upload,
+  }) {
+    const editableContent = {} as any;
+    if (username) editableContent.username = username;
+    if (bio) editableContent.bio = bio;
+    if (profileImage) {
+      await new Promise((resolve) => {
+        profileImage.createReadStream().on('finish', (args) => {
+          console.log(args);
+          resolve(args)
+        })
+      })
+    }
+    await User.update(userId, editableContent);
+    return this.getById(userId);
   }
 }

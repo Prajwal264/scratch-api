@@ -1,6 +1,10 @@
 import { UserService } from '../services/user.service';
 import { LoginResponse, UserResponse } from '../types/user.types';
-import { Arg, Mutation, Query, Resolver } from 'type-graphql';
+import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
+import { Context, Upload } from 'src/types/common.types';
+import { GraphQLUpload } from 'graphql-upload';
+import { Authorized } from '../helpers/auth.helper';
+import errors, { ERROR_TYPE } from '../constants/errors';
 
 /**
  *
@@ -27,11 +31,29 @@ export class UserResolver {
     this.userService = new UserService();
   }
 
-  @Query(() => String)
-  hi() {
-    return 'hi'
+  /**
+   *
+   *
+   * @param {string} id
+   * @return {*} 
+   * @memberof UserResolver
+   */
+  @Authorized()
+  @Query(() => UserResponse)
+  async user(@Arg('id') id: string) {
+    const user = await this.userService.getById(id)
+    return user;
   }
 
+  /**
+   *
+   *
+   * @param {string} username
+   * @param {string} email
+   * @param {string} password
+   * @return {*} 
+   * @memberof UserResolver
+   */
   @Mutation(() => UserResponse)
   async register(
     @Arg('username') username: string,
@@ -47,6 +69,14 @@ export class UserResolver {
     return userResponse;
   }
 
+  /**
+   *
+   *
+   * @param {string} email
+   * @param {string} password
+   * @return {*} 
+   * @memberof UserResolver
+   */
   @Mutation(() => LoginResponse)
   async login(
     @Arg('email') email: string,
@@ -58,5 +88,38 @@ export class UserResolver {
     });
 
     return userResponse;
+  }
+
+  /**
+   *
+   *
+   * @param {string} username
+   * @param {string} bio
+   * @param {Upload} profileImage
+   * @param {Context} { userId }
+   * @return {*} 
+   * @memberof UserResolver
+   */
+  @Authorized()
+  @Mutation(() => UserResponse)
+  async editProfile(
+    @Arg('username', { nullable: true }) username: string,
+    @Arg('bio', { nullable: true }) bio: string,
+    @Arg('profileImage', () => GraphQLUpload, { nullable: true }) profileImage: Upload,
+    @Ctx() { userId }: Context
+  ) {
+    if (!userId) {
+      return {
+        errors: [{
+          field: 'password',
+          ...errors[ERROR_TYPE.UNAUTHORIZED],
+        }]
+      }
+    }
+    return this.userService.edit(userId, {
+      username,
+      bio,
+      profileImage,
+    })
   }
 }

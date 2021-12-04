@@ -52,4 +52,14 @@ export class User extends EntityWrapper {
   @Field({ nullable: true })
   @Column({ name: "profile_image", nullable: true })
   profileImage?: string;
+
+  /**
+   *
+   *
+   * @type {string}
+   * @memberof User
+   */
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  bio?: string;
 }

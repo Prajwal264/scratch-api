@@ -4,6 +4,7 @@ import express, { Application } from 'express';
 import { buildSchema } from 'type-graphql';
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 import { createConnection } from 'typeorm';
+import { getUserIdByAuthorizationBearer } from './helpers/token.helper';
 class Server {
 
   /**
@@ -108,6 +109,12 @@ class Server {
     })
     this.graphQLServer = new ApolloServer({
       schema,
+      context: ({ req }) => {
+        const token = req.headers.authorization || '';
+        const userId = getUserIdByAuthorizationBearer(token)
+        if (userId) return { req, userId }
+        return { req }
+      },
       plugins: [ApolloServerPluginLandingPageGraphQLPlayground()]
     })
 
