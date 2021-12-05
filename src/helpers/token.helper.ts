@@ -1,4 +1,6 @@
+import { GraphQLError } from 'graphql';
 import jwt, { decode, JwtPayload, SignOptions } from 'jsonwebtoken';
+import { ERROR_TYPE } from '../constants/errors';
 
 // TODO: move this to env 
 const accessTokenSecret = '10';
@@ -65,7 +67,19 @@ export const createResetPasswordToken: (p: any, t?: string) => string = (payload
  * @return {*} 
  */
 const verifyToken: (t: string, s: string) => string | JwtPayload = (token, secret) => {
-  return jwt.verify(token, secret)
+  let payload;
+  try {
+    payload = jwt.verify(token, secret)
+  } catch(e) {
+    console.log(e.name);
+    switch (e.name) {
+      case 'TokenExpiredError': 
+        throw new GraphQLError(ERROR_TYPE.UNAUTHORIZED)
+      default: 
+      throw new Error(e.name);
+    }
+  }
+  return payload;
 }
 
 /**

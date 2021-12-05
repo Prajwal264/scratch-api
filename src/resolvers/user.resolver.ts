@@ -1,10 +1,11 @@
 import { UserService } from '../services/user.service';
-import { LoginResponse, UserResponse } from '../types/user.types';
+import { GenerateAccessTokenReponse, LoginResponse, UserResponse } from '../types/user.types';
 import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 import { Context, Upload } from 'src/types/common.types';
 import { GraphQLUpload } from 'graphql-upload';
 import { Authorized } from '../helpers/auth.helper';
 import errors, { ERROR_TYPE } from '../constants/errors';
+import { createAccessToken, verifyRefreshToken } from '../helpers/token.helper';
 
 /**
  *
@@ -122,4 +123,27 @@ export class UserResolver {
       profileImage,
     })
   }
+
+
+  /**
+   *
+   *
+   * @memberof UserResolver
+   */
+   @Mutation(() => GenerateAccessTokenReponse)
+   generateAccessToken(
+     @Arg('refreshToken') refreshToken: string,
+   ): GenerateAccessTokenReponse {
+     try {
+       const payload: any = verifyRefreshToken(refreshToken);
+       if (!payload) {
+         throw new Error("Something went wrong")
+       }
+       return {
+         accessToken: createAccessToken({ userId: payload.userId }, '15m')
+       }
+     } catch (e) {
+       return e;
+     }
+   }
 }

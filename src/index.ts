@@ -5,6 +5,7 @@ import { buildSchema } from 'type-graphql';
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 import { createConnection } from 'typeorm';
 import { getUserIdByAuthorizationBearer } from './helpers/token.helper';
+import cors from 'cors';
 class Server {
 
   /**
@@ -101,9 +102,14 @@ class Server {
    */
   private createExpressApplication() {
     this.app = express();
+
   }
 
   private async createGraphqlServer() {
+    this.app.use(cors({
+      credentials: true,
+      origin: 'http://localhost:3000'
+    }))
     const schema = await buildSchema({
       resolvers: [__dirname + '/**/*.resolver.{ts,js}']
     })
