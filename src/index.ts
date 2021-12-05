@@ -5,8 +5,9 @@ import { buildSchema } from 'type-graphql';
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 import { createConnection } from 'typeorm';
 import { getUserIdByAuthorizationBearer } from './helpers/token.helper';
-import {graphqlUploadExpress} from 'graphql-upload';
+import { graphqlUploadExpress } from 'graphql-upload';
 import cors from 'cors';
+import path from 'path';
 class Server {
 
   /**
@@ -103,6 +104,7 @@ class Server {
    */
   private createExpressApplication() {
     this.app = express();
+    this.app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
   }
 
   private async createGraphqlServer() {

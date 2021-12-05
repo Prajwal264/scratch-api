@@ -232,12 +232,18 @@ export class UserService {
       await new Promise((resolve, reject) => {
         const stream = profileImage.createReadStream()
         const UPLOAD_DIR = path.resolve(__dirname, '../../uploads');
-        const uploadPath = `${UPLOAD_DIR}/${userId}/profile_pic/`;
-        mkdirp(uploadPath);
-        const writeStream = createWriteStream(`${uploadPath}${profileImage.filename}`);
-        writeStream.on('finish', resolve);
+        mkdirp(UPLOAD_DIR);
+        const imagePath = `/${userId}/profile_pic/${profileImage.filename}`;
+        const imageLocalPath = `${UPLOAD_DIR}${imagePath}`
+        const writeStream = createWriteStream(imageLocalPath, { flags: "w" });
+        writeStream.on('finish', () => {
+          const BASE_URL = process.env.BASE_URL;
+          editableContent.profileImage = `${BASE_URL}/uploads${imagePath}`
+          console.log(editableContent.profileImage);
+          resolve(true);
+        });
         writeStream.on('error', (error) => {
-          unlink(uploadPath, () => {
+          unlink(imageLocalPath, () => {
             reject(error);
           });
         });
