@@ -4,6 +4,10 @@ import errors, { ERROR_TYPE } from '../constants/errors';
 import { UserResponse } from '../types/user.types';
 import { createAccessToken, createRefreshToken } from '../helpers/token.helper';
 import { Upload } from '../types/common.types';
+// import ImageKit from 'imagekit';
+import { createWriteStream, unlink } from 'fs'
+import path from 'path';
+import { mkdirp } from '../helpers/file.helper';
 
 export interface UserCreateInput {
   username: string,
@@ -17,12 +21,18 @@ export interface UserCreateInput {
  * @class UserService
  */
 export class UserService {
+
+  // private imageKit: ImageKit;
   /**
    * Creates an instance of UserService.
    * @memberof UserService
    */
   constructor() {
-
+    // this.imageKit = new ImageKit({
+    //   publicKey: process.env.IMAGEKIT_PUBLIC_API_KEY as string,
+    //   privateKey: process.env.IMAGEKIT_PRIVATE_API_KEY as string,
+    //   urlEndpoint: "https://ik.imagekit.io/cheeerio"
+    // })
   }
 
   /**
@@ -181,6 +191,17 @@ export class UserService {
     return userWithJwt;
   }
 
+  // private async uploadFile(encodedFile: string, { fileName, uploadPath }: { fileName: string, uploadPath: string, }): Promise<string> {
+  //   return this.imageKit.upload({
+  //     folder: uploadPath,
+  //     useUniqueFileName: false,
+  //     file: encodedFile,
+  //     fileName,
+  //   }).then((res) => {
+  //     return res.url;
+  //   })
+  // }
+
   /**
    *
    *
@@ -208,11 +229,20 @@ export class UserService {
     if (username) editableContent.username = username;
     if (bio) editableContent.bio = bio;
     if (profileImage) {
-      await new Promise((resolve) => {
-        profileImage.createReadStream().on('finish', (args) => {
-          console.log(args);
-          resolve(args)
-        })
+      await new Promise((resolve, reject) => {
+        const stream = profileImage.createReadStream()
+        const UPLOAD_DIR = path.resolve(__dirname, '../../uploads');
+        const uploadPath = `${UPLOAD_DIR}/${userId}/profile_pic/`;
+        mkdirp(uploadPath);
+        const writeStream = createWriteStream(`${uploadPath}${profileImage.filename}`);
+        writeStream.on('finish', resolve);
+        writeStream.on('error', (error) => {
+          unlink(uploadPath, () => {
+            reject(error);
+          });
+        });
+        stream.on('error', (error) => writeStream.destroy(error));
+        stream.pipe(writeStream);
       })
     }
     await User.update(userId, editableContent);

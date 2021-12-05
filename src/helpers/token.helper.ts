@@ -71,7 +71,6 @@ const verifyToken: (t: string, s: string) => string | JwtPayload = (token, secre
   try {
     payload = jwt.verify(token, secret)
   } catch(e) {
-    console.log(e.name);
     switch (e.name) {
       case 'TokenExpiredError': 
         throw new GraphQLError(ERROR_TYPE.UNAUTHORIZED)
