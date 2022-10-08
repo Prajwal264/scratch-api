@@ -115,7 +115,7 @@ class Server {
   private async createGraphqlServer() {
     this.app.use(cors({
       credentials: true,
-      origin: 'http://localhost:3000'
+      origin: process.env.CLIENT_URL
     }))
     this.app.use(graphqlUploadExpress());
     const schema = await buildSchema({
