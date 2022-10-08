@@ -6,7 +6,8 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "nodemon dist",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "build": "tsc"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
