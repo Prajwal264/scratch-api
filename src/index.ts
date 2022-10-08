@@ -8,6 +8,11 @@ import { getUserIdByAuthorizationBearer } from './helpers/token.helper';
 import { graphqlUploadExpress } from 'graphql-upload';
 import cors from 'cors';
 import path from 'path';
+
+const dotenv = require('dotenv');
+
+dotenv.config();
+
 class Server {
 
   /**
