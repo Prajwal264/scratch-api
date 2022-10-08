@@ -233,13 +233,12 @@ export class UserService {
         const stream = profileImage.createReadStream()
         const UPLOAD_DIR = path.resolve(__dirname, '../../uploads');
         mkdirp(UPLOAD_DIR);
-        const imagePath = `/${userId}/profile_pic/${profileImage.filename}`;
+        const imagePath = `/profile_pic/${userId}/${profileImage.filename}`;
         const imageLocalPath = `${UPLOAD_DIR}${imagePath}`
         const writeStream = createWriteStream(imageLocalPath, { flags: "w" });
         writeStream.on('finish', () => {
           const BASE_URL = process.env.BASE_URL;
           editableContent.profileImage = `${BASE_URL}/uploads${imagePath}`
-          console.log(editableContent.profileImage);
           resolve(true);
         });
         writeStream.on('error', (error) => {
